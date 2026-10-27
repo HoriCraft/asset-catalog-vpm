@@ -55,7 +55,7 @@ $fileName = "$packageId-$($manifest.version).zip"
 $manifest.url = $BaseUrl + 'packages/' + $fileName
 $manifest.zipSHA256 = $digest
 $listing = [ordered]@{
-    name = $(if ($Mode -eq 'LocalTest') { 'HoriCraft Asset Catalog PC内テスト' } else { 'HoriCraft Asset Catalog' })
+    name = $(if ($Mode -eq 'LocalTest') { 'Asset Notebook PC内テスト' } else { 'Asset Notebook' })
     id = $(if ($Mode -eq 'LocalTest') { 'com.horicraft.asset-catalog.local-test' } else { 'com.horicraft.asset-catalog.vpm' })
     author = 'HoriCraft'
     url = $BaseUrl + 'index.json'
@@ -67,13 +67,13 @@ New-Item -ItemType Directory -Path $packagesDir -Force | Out-Null
 Copy-Item -LiteralPath $zipFull -Destination (Join-Path $packagesDir $fileName)
 [IO.File]::WriteAllText((Join-Path $outputFull 'index.json'), ($listing | ConvertTo-Json -Depth 20), [Text.UTF8Encoding]::new($false))
 $state = if ($report.releaseEligible -eq $true) { '機能の利用には解除キーによる有効化が必要です。' } else { '配布前の確認が残る候補です。動作確認の範囲は担当の案内に従ってください。' }
-$label = if ($Mode -eq 'LocalTest') { 'PC内の導入確認用VPM' } else { 'HoriCraft Asset Catalog VPM' }
+$label = if ($Mode -eq 'LocalTest') { 'PC内の導入確認用VPM' } else { 'Asset Notebook VPM' }
 $localNote = if ($Mode -eq 'LocalTest') { '<p>このURLは、このPCでサーバーが動作している間だけ使えます。</p>' } else { '' }
 $safeVersion = [Net.WebUtility]::HtmlEncode($manifest.version)
 $safeUrl = [Net.WebUtility]::HtmlEncode($listing.url)
 $addUrl = 'vcc://vpm/addRepo?url=' + [Uri]::EscapeDataString($listing.url)
 $html = @"
-<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>$label</title><style>body{font-family:system-ui,sans-serif;max-width:48rem;margin:8vh auto;padding:24px;line-height:1.8;color:#18382d;background:#f5f7f5}a{color:#075c43}code{overflow-wrap:anywhere}aside{padding:16px;background:#fff4cc;border-radius:8px}</style><main><h1>$label</h1><p>HoriCraft Asset Catalog $safeVersion</p><aside>動作確認用です。販売開始を示すものではありません。<br>$state</aside><p><a href="$addUrl">VCC / ALCOM にリポジトリを追加</a></p><p>手動追加用URL<br><code>$safeUrl</code></p><ol><li>VCC / ALCOM でプレリリース版を表示してください。</li><li>確認用プロジェクトに候補版を導入してください。</li><li>Unityで HoriCraft → Asset Catalog を開いてください。</li></ol>$localNote</main></html>
+<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>$label</title><style>body{font-family:system-ui,sans-serif;max-width:48rem;margin:8vh auto;padding:24px;line-height:1.8;color:#18382d;background:#f5f7f5}a{color:#075c43}code{overflow-wrap:anywhere}aside{padding:16px;background:#fff4cc;border-radius:8px}</style><main><h1>$label</h1><p>Asset Notebook $safeVersion</p><aside>動作確認用です。販売開始を示すものではありません。<br>$state</aside><p><a href="$addUrl">VCC / ALCOM にリポジトリを追加</a></p><p>手動追加用URL<br><code>$safeUrl</code></p><ol><li>VCC / ALCOM でプレリリース版を表示してください。</li><li>確認用プロジェクトに候補版を導入してください。</li><li>UnityのHoriCraftメニューから本ツールを開いてください。</li></ol>$localNote</main></html>
 "@
 [IO.File]::WriteAllText((Join-Path $outputFull 'index.html'), $html, [Text.UTF8Encoding]::new($false))
 [ordered]@{mode=$Mode; version=$manifest.version; sha256=$digest; packageFiles=$names.Count; releaseEligible=$report.releaseEligible; listing=$listing.url; output=$outputFull} | ConvertTo-Json
